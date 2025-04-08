@@ -6,6 +6,16 @@ const app = express();
 app.use(express.json());
 dotenv.config();
 
+const fs = require('fs');
+const path = require('path');
+
+// Ensure ./db folder exists
+const dbDir = path.join(__dirname, 'db');
+if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir);
+}
+
+
 const db = new sqlite3.Database('./db/todos.db', (err) => {
     if (err) {
         console.error('Error connecting to database:', err.message);
@@ -17,7 +27,7 @@ const db = new sqlite3.Database('./db/todos.db', (err) => {
 db.run(`CREATE TABLE IF NOT EXISTS todos (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT,
-  completed INTEGER DEFAULT 0,
+  completed INTEGER DEFAULT 0
 )`, (err) => {
     if (err) {
         console.error('Error creating table:', err.message);
@@ -31,7 +41,7 @@ app.get('/todos', (req, res) => {
         if (err) {
             res.status(500).json({ error: err.message });
         } else {
-            res.json({ todos: todos });
+            res.json({ todos: rows });
         }
     });
 });
